@@ -15,17 +15,13 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# LÓGICA DE EXTRACCIÓN Y PROCESAMIENTO (Portado de Colab)
+# LÓGICA DE EXTRACCIÓN Y PROCESAMIENTO
 # -----------------------------------------------------------------------------
-
-# Usamos el decorador de caché de Streamlit para que esta función solo se ejecute una vez.
-# Esto mejora enormemente el rendimiento de la app.
 @st.cache_data
 def cargar_y_procesar_datos():
     """
     Esta función contiene toda la lógica de extracción de datos del HTML.
-    Al estar cacheada, no se volverá a ejecutar cada vez que el usuario interactúe
-    con un widget, haciendo la app mucho más rápida.
+    Al estar cacheada, no se volverá a ejecutar cada vez que el usuario interactúe.
     """
     html_content = """
     <section class="u-estructura-home__seccion"><div class="c-board c-board-indicadores" data-mrf-recirculation="Indicadores"><div class="c-board__header"><h2 class="c-board__header__titulo">INDICADORES</h2><a href="/economia" class="c-board-indicadores__link" data-mrf-link="https://www.eltiempo.com/economia" cmp-ltrk="Indicadores" cmp-ltrk-idx="0" mrfobservableid="f5410de9-fc10-453b-8d21-aa6494e28520">> Más Economía</a></div>    <div class="c-board-indicadores__contenedor">
@@ -53,15 +49,12 @@ def cargar_y_procesar_datos():
     return df, indicadores_dict
 
 # -----------------------------------------------------------------------------
-# PLANTILLAS DE GENERACIÓN DE NOTICIAS (Portado de Colab)
+# PLANTILLAS DE GENERACIÓN DE NOTICIAS
 # -----------------------------------------------------------------------------
 
 # --- Bloques de Contexto ---
 CONTEXTO_DOLAR = "El valor del dólar frente al peso colombiano es un indicador fundamental para la economía del país. Su fluctuación tiene un impacto directo en el costo de los productos importados, los precios de los tiquetes aéreos, la tecnología y las materias primas. Asimismo, afecta el valor de las exportaciones colombianas, como el petróleo y el café, y el envío de remesas."
-CONTEXTO_EURO = "La cotización del euro es un referente clave, especialmente para el comercio con la Unión Europea, uno de los socios comerciales más importantes de Colombia. Su valor influye en las transacciones comerciales, el turismo y las inversiones entre ambas regiones."
 CONTEXTO_ICOLCAP = "El MSCI COLCAP es el principal índice de la Bolsa de Valores de Colombia (bvc) y agrupa a las acciones más líquidas y de mayor capitalización bursátil. Su desempeño refleja la confianza de los inversionistas en las grandes empresas del país y en la economía colombiana en general. Una tendencia al alza suele indicar optimismo, mientras que una baja puede señalar preocupación."
-CONTEXTO_CAFE = "El café es uno de los productos de exportación más emblemáticos de Colombia. Su precio en los mercados internacionales tiene un impacto directo en la economía de miles de familias caficultoras y en el ingreso de divisas al país. Factores como el clima global, la producción en otros países y la demanda mundial determinan su valor."
-CONTEXTO_ORO = "El oro es considerado un 'activo refugio' a nivel mundial. En tiempos de incertidumbre económica o volatilidad en los mercados, los inversionistas tienden a comprar oro para proteger su capital, lo que puede influir en su precio. Por ello, su cotización es un termómetro de la confianza en la economía global."
 
 fuente = "El Tiempo"
 attribution_line = f"<i>*Este contenido fue reescrito con la asistencia de una inteligencia artificial, basado en información de {fuente}.</i>"
@@ -92,7 +85,10 @@ def generar_resumen_economico(datos_completos, fecha):
     dolar_data, icolcap_data, cafe_data = datos_completos.get('Dólar', {}), datos_completos.get('ICOLCAP', {}), datos_completos.get('Café', {})
     titulo = f"Cierre de mercados en Colombia: Resumen de la jornada del {fecha}"
     subtitulo = f"El dólar cerró en {dolar_data.get('Valor', 'N/A')}, el índice MSCI COLCAP se ubicó en {icolcap_data.get('Valor', 'N/A')} y el café finalizó en {cafe_data.get('Valor', 'N/A')}."
-    return f"""<h1>{titulo}</h1><h2>{subtitulo}</h2><hr><h2>Mercado Cambiario</h2><p>El <strong>dólar</strong> cerró en <strong>{dolar_data.get('Valor', 'N/A')}</strong>. El <strong>euro</strong> se cotizó en <strong>{datos_completos.get('Euro', {}).get('Valor', 'N/A')}</strong>.</p><h2>Bolsa y Materias Primas</h2><p>El índice <strong>MSCI COLCAP</strong> cerró en <strong>{icolcap_data.get('Valor', 'N/A')}</strong> puntos. El <strong>café</strong> se cotizó en <strong>{cafe_data.get('Valor', 'N/A')}</strong> y el <strong>oro</strong> en <strong>{datos_completos.get('Oro', {}).get('Valor', 'N/A')}</strong>.</p>{attribution_line}"
+    return f"""<h1>{titulo}</h1><h2>{subtitulo}</h2><hr>
+               <h2>Mercado Cambiario</h2><p>El <strong>dólar</strong> cerró en <strong>{dolar_data.get('Valor', 'N/A')}</strong>. El <strong>euro</strong> se cotizó en <strong>{datos_completos.get('Euro', {}).get('Valor', 'N/A')}</strong>.</p>
+               <h2>Bolsa y Materias Primas</h2><p>El índice <strong>MSCI COLCAP</strong> cerró en <strong>{icolcap_data.get('Valor', 'N/A')}</strong> puntos. El <strong>café</strong> se cotizó en <strong>{cafe_data.get('Valor', 'N/A')}</strong> y el <strong>oro</strong> en <strong>{datos_completos.get('Oro', {}).get('Valor', 'N/A')}</strong>.</p>
+               {attribution_line}"""
 
 # -----------------------------------------------------------------------------
 # CONSTRUCCIÓN DE LA INTERFAZ DE USUARIO (UI)
@@ -136,8 +132,7 @@ if opcion_seleccionada:
         articulo_html = funcion_generadora(indicadores_dict, fecha_hoy)
     else:
         # Las funciones individuales reciben los datos de su indicador específico
-        # Extraemos el nombre base del indicador desde la opción seleccionada
-        nombre_indicador = opcion_seleccionada.split(" ")[2] # "Noticia del Dólar" -> "Dólar"
+        nombre_indicador = opcion_seleccionada.split(" ")[2]
         if nombre_indicador in indicadores_dict:
             datos_indicador = indicadores_dict[nombre_indicador]
             articulo_html = funcion_generadora(datos_indicador, fecha_hoy)
